@@ -166,7 +166,6 @@ module.exports = function (router) {
             if (!isValidId(userId)) 
                 throw new ApiError(404, NOT_FOUND);
 
-            let deleted;
             await User.db.transaction(async function (session) {
                 let user = await User.findById(userId).session(session);
                 if (!user) 
@@ -174,9 +173,8 @@ module.exports = function (router) {
 
                 await Task.updateMany({ assignedUser: String(user._id) }, { $set: UNASSIGN }, { session: session });
                 await user.deleteOne({ session: session });
-                deleted = user;
             });
-            send(res, 200, 'User deleted.', deleted);
+            res.status(204).end();
         } catch (err) {
             api.handleError(res, err);
         }

@@ -139,7 +139,6 @@ module.exports = function (router) {
             if (!isValidId(taskId)) 
                 throw new ApiError(404, NOT_FOUND);
 
-            let deleted;
             await Task.db.transaction(async function (session) {
                 let task = await Task.findById(taskId).session(session);
                 if (!task) 
@@ -151,9 +150,8 @@ module.exports = function (router) {
                     { $pull: { pendingTasks: String(task._id) } },
                     { session: session }
                 );
-                deleted = task;
             });
-            send(res, 200, 'Task deleted.', deleted);
+            res.status(204).end();
         } catch (err) {
             api.handleError(res, err);
         }
